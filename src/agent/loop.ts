@@ -157,8 +157,11 @@ Complete the task and return a clear, concise summary.`;
 
       for (const tc of toolCalls) {
         let output = await executeTool(tc.name, tc.input as Record<string, unknown>, context);
-        // Apply smart truncation to tool output
-        output = smartTruncate(output, maxToolOutput);
+        // Apply smart truncation - but NOT for file reads (need complete content for edits)
+        const noTruncateTools = ["read_file", "Skill"];
+        if (!noTruncateTools.includes(tc.name)) {
+          output = smartTruncate(output, maxToolOutput);
+        }
         results.push({ type: "tool_result" as const, tool_use_id: tc.id, content: output });
       }
 
@@ -208,8 +211,12 @@ Complete the task and return a clear, concise summary.`;
         runSubagent
       );
 
-      // Apply smart truncation to tool output
-      output = smartTruncate(output, maxToolOutput);
+      // Apply smart truncation to tool output - but NOT for file reads
+      // File content must be complete for accurate edits
+      const noTruncateTools = ["read_file", "Skill"];
+      if (!noTruncateTools.includes(tc.name)) {
+        output = smartTruncate(output, maxToolOutput);
+      }
 
       emit({ type: "tool_result", data: { name: tc.name, output } });
       results.push({ type: "tool_result" as const, tool_use_id: tc.id, content: output });
