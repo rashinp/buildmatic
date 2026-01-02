@@ -1,10 +1,20 @@
 // src/agent/loop.ts
 
 import Anthropic from "@anthropic-ai/sdk";
-import type { MessageParam, ToolUseBlock } from "@anthropic-ai/sdk/resources/messages";
+import type {
+  MessageParam,
+  ToolUseBlock,
+} from "@anthropic-ai/sdk/resources/messages";
 import type { AgentConfig, AgentEvent, AgentType } from "./types.js";
 import { AGENT_TYPES } from "./config.js";
-import { getAllTools, getToolsForAgent, executeTool, ToolContext, TodoManager, SkillLoader } from "../tools/index.js";
+import {
+  getAllTools,
+  getToolsForAgent,
+  executeTool,
+  ToolContext,
+  TodoManager,
+  SkillLoader,
+} from "../tools/index.js";
 
 export interface AgentOptions {
   config: AgentConfig;
@@ -17,7 +27,7 @@ export interface AgentOptions {
 function smartTruncate(output: string, maxLength: number): string {
   if (output.length <= maxLength) return output;
 
-  const headLength = Math.floor(maxLength * 0.7);  // 70% from start
+  const headLength = Math.floor(maxLength * 0.7); // 70% from start
   const tailLength = Math.floor(maxLength * 0.25); // 25% from end
   const head = output.slice(0, headLength);
   const tail = output.slice(-tailLength);
@@ -27,23 +37,50 @@ function smartTruncate(output: string, maxLength: number): string {
 }
 
 /**
- * Summarize old messages to reduce context size
+ * Summarize old messages to reduce context size while preserving key information
  */
-function summarizeMessages(messages: MessageParam[], keepLast: number): MessageParam[] {
+function summarizeMessages(
+  messages: MessageParam[],
+  keepLast: number
+): MessageParam[] {
   if (messages.length <= keepLast) return messages;
 
   const oldMessages = messages.slice(0, -keepLast);
   const recentMessages = messages.slice(-keepLast);
 
-  // Create a summary of old messages
-  const summary = oldMessages
-    .filter(m => m.role === "user" && typeof m.content === "string")
-    .map(m => `- ${(m.content as string).slice(0, 100)}`)
-    .join("\n");
+  // Extract key information from old messages
+  const summaryParts: string[] = [];
+
+  for (const msg of oldMessages) {
+    if (msg.role === "user") {
+      if (typeof msg.content === "string") {
+        // User text message
+        summaryParts.push(`User: ${msg.content.slice(0, 200)}`);
+      } else if (Array.isArray(msg.content)) {
+        // Tool results - extract key info
+        for (const block of msg.content) {
+          if (block.type === "tool_result" && typeof block.content === "string") {
+            // Only include first 100 chars of tool results
+            const preview = block.content.slice(0, 100).replace(/\n/g, " ");
+            summaryParts.push(`Tool result: ${preview}...`);
+          }
+        }
+      }
+    } else if (msg.role === "assistant" && Array.isArray(msg.content)) {
+      // Assistant actions
+      for (const block of msg.content) {
+        if (block.type === "text") {
+          summaryParts.push(`Assistant: ${block.text.slice(0, 150)}`);
+        } else if (block.type === "tool_use") {
+          summaryParts.push(`Used tool: ${block.name}`);
+        }
+      }
+    }
+  }
 
   const summaryMessage: MessageParam = {
     role: "user",
-    content: `[Previous conversation summary - ${oldMessages.length} messages]\n${summary}\n[End summary]`
+    content: `[Context from ${oldMessages.length} earlier messages]\n${summaryParts.slice(0, 20).join("\n")}\n[End context - recent messages follow]`,
   };
 
   return [summaryMessage, ...recentMessages];
@@ -64,7 +101,9 @@ Loop: plan -> act with tools -> report.
 ${skillLoader.getDescriptions()}
 
 **Subagents available** (invoke with Task tool for focused subtasks):
-${Object.entries(AGENT_TYPES).map(([n, c]) => `- ${n}: ${c.description}`).join("\n")}
+${Object.entries(AGENT_TYPES)
+  .map(([n, c]) => `- ${n}: ${c.description}`)
+  .join("\n")}
 
 Rules:
 - Use Skill tool IMMEDIATELY when a task matches a skill description
@@ -79,8 +118,8 @@ Rules:
       {
         type: "text" as const,
         text: promptText,
-        cache_control: { type: "ephemeral" as const }
-      }
+        cache_control: { type: "ephemeral" as const },
+      },
     ];
   }
 
@@ -96,7 +135,7 @@ export async function runAgent(
   // Defaults
   const maxToolOutput = config.maxToolOutputLength ?? 5000;
   const maxContextMessages = config.maxContextMessages ?? 20;
-  const modelFast = config.modelFast ?? "claude-haiku-3-5-20241022";
+  const modelFast = config.modelFast ?? "claude-3-5-haiku-20241022";
 
   const client = config.baseUrl
     ? new Anthropic({ apiKey: config.apiKey, baseURL: config.baseUrl })
@@ -121,7 +160,11 @@ export async function runAgent(
    * - explore/plan: Use fast model (Haiku) - read-only, cheaper
    * - code: Use main model (Sonnet) - needs full capability
    */
-  const runSubagent = async (description: string, prompt: string, agentType: AgentType): Promise<string> => {
+  const runSubagent = async (
+    description: string,
+    prompt: string,
+    agentType: AgentType
+  ): Promise<string> => {
     const subConfig = AGENT_TYPES[agentType];
     const subTools = getToolsForAgent(agentType);
 
@@ -136,7 +179,14 @@ Complete the task and return a clear, concise summary.`;
 
     let subMessages: MessageParam[] = [{ role: "user", content: prompt }];
 
-    emit({ type: "text", data: { content: `[${agentType}:${subModel.includes("haiku") ? "haiku" : "sonnet"}] ${description}` } });
+    emit({
+      type: "text",
+      data: {
+        content: `[${agentType}:${
+          subModel.includes("haiku") ? "haiku" : "sonnet"
+        }] ${description}`,
+      },
+    });
 
     while (true) {
       const response = await client.messages.create({
@@ -144,25 +194,37 @@ Complete the task and return a clear, concise summary.`;
         system: subSystem,
         messages: subMessages,
         tools: subTools,
-        max_tokens: 4000,  // Reduced from 8000 for subagents
+        max_tokens: 4000, // Reduced from 8000 for subagents
       });
 
       if (response.stop_reason !== "tool_use") {
-        const textBlock = response.content.find((b): b is Anthropic.TextBlock => b.type === "text");
+        const textBlock = response.content.find(
+          (b): b is Anthropic.TextBlock => b.type === "text"
+        );
         return textBlock?.text || "(subagent returned no text)";
       }
 
-      const toolCalls = response.content.filter((b): b is ToolUseBlock => b.type === "tool_use");
+      const toolCalls = response.content.filter(
+        (b): b is ToolUseBlock => b.type === "tool_use"
+      );
       const results = [];
 
       for (const tc of toolCalls) {
-        let output = await executeTool(tc.name, tc.input as Record<string, unknown>, context);
+        let output = await executeTool(
+          tc.name,
+          tc.input as Record<string, unknown>,
+          context
+        );
         // Apply smart truncation - but NOT for file reads (need complete content for edits)
         const noTruncateTools = ["read_file", "Skill"];
         if (!noTruncateTools.includes(tc.name)) {
           output = smartTruncate(output, maxToolOutput);
         }
-        results.push({ type: "tool_result" as const, tool_use_id: tc.id, content: output });
+        results.push({
+          type: "tool_result" as const,
+          tool_use_id: tc.id,
+          content: output,
+        });
       }
 
       subMessages.push({ role: "assistant", content: response.content });
@@ -175,13 +237,32 @@ Complete the task and return a clear, concise summary.`;
     // Apply context window management
     const managedMessages = summarizeMessages(messages, maxContextMessages);
 
-    const response = await client.messages.create({
+    // Build request with optional caching
+    const requestParams: Anthropic.Messages.MessageCreateParams = {
       model: config.model,
       system: systemPrompt,
       messages: managedMessages,
       tools,
       max_tokens: 8000,
-    });
+    };
+
+    // Make API call - cache_control in system prompt enables caching automatically
+    const response = await client.messages.create(requestParams);
+
+    // Report token usage (cache stats if available)
+    if (response.usage) {
+      const usage = response.usage as unknown as Record<string, number>;
+      const cacheRead = usage["cache_read_input_tokens"] || 0;
+      const cacheCreated = usage["cache_creation_input_tokens"] || 0;
+      if (cacheRead > 0 || cacheCreated > 0) {
+        emit({
+          type: "text",
+          data: {
+            content: `[tokens: in=${response.usage.input_tokens}, out=${response.usage.output_tokens}, cache_read=${cacheRead}, cache_created=${cacheCreated}]`,
+          },
+        });
+      }
+    }
 
     // Process response content
     for (const block of response.content) {
@@ -198,7 +279,9 @@ Complete the task and return a clear, concise summary.`;
     }
 
     // Execute tools
-    const toolCalls = response.content.filter((b): b is ToolUseBlock => b.type === "tool_use");
+    const toolCalls = response.content.filter(
+      (b): b is ToolUseBlock => b.type === "tool_use"
+    );
     const results = [];
 
     for (const tc of toolCalls) {
@@ -219,7 +302,11 @@ Complete the task and return a clear, concise summary.`;
       }
 
       emit({ type: "tool_result", data: { name: tc.name, output } });
-      results.push({ type: "tool_result" as const, tool_use_id: tc.id, content: output });
+      results.push({
+        type: "tool_result" as const,
+        tool_use_id: tc.id,
+        content: output,
+      });
     }
 
     messages.push({ role: "assistant", content: response.content });

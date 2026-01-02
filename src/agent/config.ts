@@ -16,7 +16,7 @@ export function loadConfig(workDir?: string): AgentConfig {
     apiKey,
     baseUrl: process.env.ANTHROPIC_BASE_URL || undefined,
     model: process.env.MODEL_NAME || "claude-sonnet-4-20250514",
-    modelFast: process.env.MODEL_NAME_FAST || "claude-haiku-3-5-20241022",
+    modelFast: process.env.MODEL_NAME_FAST || "claude-3-5-haiku-20241022",
     workDir: workDir || process.cwd(),
     skillsDir: resolve(workDir || process.cwd(), "skills"),
     maxContextMessages: parseInt(process.env.MAX_CONTEXT_MESSAGES || "20", 10),
