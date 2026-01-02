@@ -16,8 +16,12 @@ export function loadConfig(workDir?: string): AgentConfig {
     apiKey,
     baseUrl: process.env.ANTHROPIC_BASE_URL || undefined,
     model: process.env.MODEL_NAME || "claude-sonnet-4-20250514",
+    modelFast: process.env.MODEL_NAME_FAST || "claude-haiku-3-5-20241022",
     workDir: workDir || process.cwd(),
     skillsDir: resolve(workDir || process.cwd(), "skills"),
+    maxContextMessages: parseInt(process.env.MAX_CONTEXT_MESSAGES || "20", 10),
+    maxToolOutputLength: parseInt(process.env.MAX_TOOL_OUTPUT || "5000", 10),
+    enableCaching: process.env.ENABLE_CACHING !== "false",
   };
 }
 

@@ -22,8 +22,12 @@ export interface AgentConfig {
   apiKey: string;
   baseUrl?: string;
   model: string;
+  modelFast?: string;  // Cheaper model for exploration/planning (default: haiku)
   workDir: string;
   skillsDir: string;
+  maxContextMessages?: number;  // Max messages before summarization (default: 20)
+  maxToolOutputLength?: number; // Max chars for tool output (default: 5000)
+  enableCaching?: boolean;      // Enable prompt caching (default: true)
 }
 
 export type AgentType = "explore" | "code" | "plan";
