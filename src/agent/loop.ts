@@ -136,7 +136,14 @@ Rules:
 - Use Task tool for subtasks needing focused exploration or implementation
 - Use TodoWrite to track multi-step work
 - Prefer tools over prose. Act, don't just explain.
-- After finishing, summarize what changed.`;
+- After finishing, summarize what changed.
+
+**IMPORTANT: Project Organization**
+When creating any application, website, or multi-file project:
+1. ALWAYS create a dedicated project folder first (e.g., "my-app/", "landing-page/")
+2. Use a descriptive, kebab-case folder name based on the project purpose
+3. Place ALL project files inside this folder - never in the root directory
+4. Example: For a todo app, create "todo-app/" then "todo-app/index.html", "todo-app/styles.css", etc.`;
 
   // Return with cache control if caching is enabled
   if (config.enableCaching !== false) {
