@@ -37,6 +37,31 @@ function smartTruncate(output: string, maxLength: number): string {
 }
 
 /**
+ * Sanitize assistant message for history - truncate large tool inputs
+ * This prevents huge content (like file writes) from bloating context
+ */
+function sanitizeAssistantMessage(content: Anthropic.Messages.ContentBlock[]): Anthropic.Messages.ContentBlock[] {
+  return content.map(block => {
+    if (block.type === 'tool_use') {
+      const input = block.input as Record<string, unknown>;
+      const sanitizedInput: Record<string, unknown> = {};
+
+      for (const [key, value] of Object.entries(input)) {
+        if (typeof value === 'string' && value.length > 500) {
+          // Truncate large string inputs (like file content)
+          sanitizedInput[key] = value.slice(0, 200) + `... [${value.length - 200} chars truncated]`;
+        } else {
+          sanitizedInput[key] = value;
+        }
+      }
+
+      return { ...block, input: sanitizedInput };
+    }
+    return block;
+  });
+}
+
+/**
  * Summarize old messages to reduce context size while preserving key information
  */
 function summarizeMessages(
@@ -132,9 +157,9 @@ export async function runAgent(
 ): Promise<MessageParam[]> {
   const { config, onEvent } = options;
 
-  // Defaults
-  const maxToolOutput = config.maxToolOutputLength ?? 5000;
-  const maxContextMessages = config.maxContextMessages ?? 20;
+  // Defaults - lower values to reduce token usage
+  const maxToolOutput = config.maxToolOutputLength ?? 3000;  // Reduced from 5000
+  const maxContextMessages = config.maxContextMessages ?? 10; // Reduced from 20
   const modelFast = config.modelFast ?? "claude-3-5-haiku-20241022";
 
   const client = config.baseUrl
@@ -249,19 +274,17 @@ Complete the task and return a clear, concise summary.`;
     // Make API call - cache_control in system prompt enables caching automatically
     const response = await client.messages.create(requestParams);
 
-    // Report token usage (cache stats if available)
+    // Always report token usage
     if (response.usage) {
       const usage = response.usage as unknown as Record<string, number>;
       const cacheRead = usage["cache_read_input_tokens"] || 0;
       const cacheCreated = usage["cache_creation_input_tokens"] || 0;
-      if (cacheRead > 0 || cacheCreated > 0) {
-        emit({
-          type: "text",
-          data: {
-            content: `[tokens: in=${response.usage.input_tokens}, out=${response.usage.output_tokens}, cache_read=${cacheRead}, cache_created=${cacheCreated}]`,
-          },
-        });
-      }
+      emit({
+        type: "text",
+        data: {
+          content: `[tokens: in=${response.usage.input_tokens}, out=${response.usage.output_tokens}, cache_read=${cacheRead}, cache_created=${cacheCreated}]`,
+        },
+      });
     }
 
     // Process response content
@@ -309,7 +332,9 @@ Complete the task and return a clear, concise summary.`;
       });
     }
 
-    messages.push({ role: "assistant", content: response.content });
+    // Sanitize assistant message to truncate large tool inputs before storing in history
+    const sanitizedContent = sanitizeAssistantMessage(response.content);
+    messages.push({ role: "assistant", content: sanitizedContent });
     messages.push({ role: "user", content: results });
   }
 }
