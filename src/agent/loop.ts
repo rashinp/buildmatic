@@ -74,39 +74,53 @@ function summarizeMessages(
   const oldMessages = messages.slice(0, -keepLast);
   const recentMessages = messages.slice(-keepLast);
 
-  // Extract key information from old messages
+  // Extract key information from old messages - be very concise
   const summaryParts: string[] = [];
+  const filesWritten: string[] = [];
 
   for (const msg of oldMessages) {
     if (msg.role === "user") {
       if (typeof msg.content === "string") {
-        // User text message
-        summaryParts.push(`User: ${msg.content.slice(0, 200)}`);
+        summaryParts.push(`User: ${msg.content.slice(0, 100)}`);
       } else if (Array.isArray(msg.content)) {
-        // Tool results - extract key info
         for (const block of msg.content) {
           if (block.type === "tool_result" && typeof block.content === "string") {
-            // Only include first 100 chars of tool results
-            const preview = block.content.slice(0, 100).replace(/\n/g, " ");
-            summaryParts.push(`Tool result: ${preview}...`);
+            // Extract file write confirmations
+            const writeMatch = block.content.match(/Wrote (\d+) bytes to (.+)/);
+            if (writeMatch) {
+              filesWritten.push(`${writeMatch[2]} (${writeMatch[1]}b)`);
+            }
           }
         }
       }
     } else if (msg.role === "assistant" && Array.isArray(msg.content)) {
-      // Assistant actions
       for (const block of msg.content) {
-        if (block.type === "text") {
-          summaryParts.push(`Assistant: ${block.text.slice(0, 150)}`);
-        } else if (block.type === "tool_use") {
-          summaryParts.push(`Used tool: ${block.name}`);
+        if (block.type === "tool_use") {
+          // Just note tool usage, not content
+          const input = block.input as Record<string, unknown>;
+          if (block.name === "write_file" && input.path) {
+            // Already tracked in filesWritten
+          } else if (block.name === "Skill") {
+            summaryParts.push(`Loaded skill: ${input.skill}`);
+          } else {
+            summaryParts.push(`Used: ${block.name}`);
+          }
         }
       }
     }
   }
 
+  // Build concise summary
+  let summary = `[Earlier context: ${oldMessages.length} messages]\n`;
+  if (filesWritten.length > 0) {
+    summary += `Files created: ${filesWritten.join(", ")}\n`;
+  }
+  summary += summaryParts.slice(0, 10).join("\n");
+  summary += "\n[Recent messages follow]";
+
   const summaryMessage: MessageParam = {
     role: "user",
-    content: `[Context from ${oldMessages.length} earlier messages]\n${summaryParts.slice(0, 20).join("\n")}\n[End context - recent messages follow]`,
+    content: summary,
   };
 
   return [summaryMessage, ...recentMessages];
@@ -167,7 +181,7 @@ export async function runAgent(
 
   // Defaults - balanced for token savings + quality
   const maxToolOutput = config.maxToolOutputLength ?? 4000;
-  const maxContextMessages = config.maxContextMessages ?? 16; // Keep more context for multi-file tasks
+  const maxContextMessages = config.maxContextMessages ?? 12; // Summarize older messages sooner
   const modelFast = config.modelFast ?? "claude-3-5-haiku-20241022";
 
   const client = config.baseUrl
