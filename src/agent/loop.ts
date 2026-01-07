@@ -15,6 +15,7 @@ import {
   TodoManager,
   SkillLoader,
 } from "../tools/index.js";
+import { LLMLogger } from "./logger.js";
 
 export interface AgentOptions {
   config: AgentConfig;
@@ -200,6 +201,9 @@ export async function runAgent(
   const tools = getAllTools(skillLoader);
   const systemPrompt = buildSystemPrompt(config, skillLoader);
 
+  // Initialize logger for this session
+  const logger = new LLMLogger(config.workDir, config.model);
+
   const emit = (event: AgentEvent) => onEvent?.(event);
 
   /**
@@ -294,7 +298,18 @@ Complete the task and return a clear, concise summary.`;
     };
 
     // Make API call - cache_control in system prompt enables caching automatically
+    const startTime = Date.now();
     const response = await client.messages.create(requestParams);
+    const durationMs = Date.now() - startTime;
+
+    // Log the API call
+    logger.logCall({
+      model: config.model,
+      messages: managedMessages,
+      systemPrompt,
+      response,
+      durationMs,
+    });
 
     // Always report token usage
     if (response.usage) {

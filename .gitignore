@@ -18,3 +18,6 @@ script.js
 *-journal/
 *-tracker/
 *-portfolio/
+
+# LLM call logs
+.buildmatic-logs/
