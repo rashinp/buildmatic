@@ -2,3 +2,12 @@ node_modules/
 dist/
 .env
 *.log
+
+# Generated files (from buildmatic runs)
+index.html
+style.css
+styles.css
+script.js
+*-landing-page/
+*-app/
+*-dashboard/
