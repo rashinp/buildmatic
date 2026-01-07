@@ -1,7 +1,7 @@
 // src/ui/App.tsx
 
-import React, { useState, useCallback, useRef } from 'react';
-import { Box, useApp, useInput } from 'ink';
+import React, { useState, useCallback, useReducer } from 'react';
+import { Box, useApp, useInput, Text } from 'ink';
 import { Header } from './Header.js';
 import { MessageList, Message } from './MessageList.js';
 import { StreamingText } from './StreamingText.js';
@@ -15,22 +15,67 @@ interface AppProps {
   config: AgentConfig;
 }
 
+// Use reducer for more predictable state updates
+interface UIState {
+  messages: Message[];
+  streamingText: string;
+  activeTool: string | null;
+  isProcessing: boolean;
+  tokensIn: number;
+  tokensOut: number;
+  cacheRead: number;
+}
+
+type UIAction =
+  | { type: 'ADD_MESSAGE'; message: Message }
+  | { type: 'SET_STREAMING'; text: string }
+  | { type: 'APPEND_STREAMING'; text: string }
+  | { type: 'SET_TOOL'; name: string | null }
+  | { type: 'SET_PROCESSING'; value: boolean }
+  | { type: 'UPDATE_TOKENS'; input: number; output: number; cache: number }
+  | { type: 'RESET_STREAMING' };
+
+function uiReducer(state: UIState, action: UIAction): UIState {
+  switch (action.type) {
+    case 'ADD_MESSAGE':
+      return { ...state, messages: [...state.messages, action.message] };
+    case 'SET_STREAMING':
+      return { ...state, streamingText: action.text };
+    case 'APPEND_STREAMING':
+      return { ...state, streamingText: state.streamingText + action.text };
+    case 'SET_TOOL':
+      return { ...state, activeTool: action.name };
+    case 'SET_PROCESSING':
+      return { ...state, isProcessing: action.value };
+    case 'UPDATE_TOKENS':
+      return {
+        ...state,
+        tokensIn: state.tokensIn + action.input,
+        tokensOut: state.tokensOut + action.output,
+        cacheRead: state.cacheRead + action.cache,
+      };
+    case 'RESET_STREAMING':
+      return { ...state, streamingText: '', activeTool: null };
+    default:
+      return state;
+  }
+}
+
 export const App: React.FC<AppProps> = ({ config }) => {
   const { exit } = useApp();
 
-  // State
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [history, setHistory] = useState<MessageParam[]>([]);
-  const [streamingText, setStreamingText] = useState('');
-  const [activeTool, setActiveTool] = useState<string | null>(null);
-  const [inputValue, setInputValue] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [tokensIn, setTokensIn] = useState(0);
-  const [tokensOut, setTokensOut] = useState(0);
-  const [cacheRead, setCacheRead] = useState(0);
+  const [state, dispatch] = useReducer(uiReducer, {
+    messages: [],
+    streamingText: '',
+    activeTool: null,
+    isProcessing: false,
+    tokensIn: 0,
+    tokensOut: 0,
+    cacheRead: 0,
+  });
 
-  // Ref to track streaming text for final message
-  const streamingRef = useRef('');
+  const [history, setHistory] = useState<MessageParam[]>([]);
+  const [inputValue, setInputValue] = useState('');
 
   // Handle Ctrl+C
   useInput((input, key) => {
@@ -49,19 +94,23 @@ export const App: React.FC<AppProps> = ({ config }) => {
     }
 
     // Add user message
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: trimmed,
-    };
-    setMessages((prev) => [...prev, userMessage]);
+    dispatch({
+      type: 'ADD_MESSAGE',
+      message: {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: trimmed,
+      },
+    });
+
     setInputValue('');
-    setIsProcessing(true);
-    setStreamingText('');
-    streamingRef.current = '';
+    dispatch({ type: 'SET_PROCESSING', value: true });
+    dispatch({ type: 'RESET_STREAMING' });
 
     // Update history for agent
     const newHistory: MessageParam[] = [...history, { role: 'user', content: trimmed }];
+
+    let currentStreaming = '';
 
     try {
       const updatedHistory = await runAgent(newHistory, {
@@ -74,40 +123,46 @@ export const App: React.FC<AppProps> = ({ config }) => {
               if (content.startsWith('[tokens:')) {
                 const match = content.match(/in=(\d+).*out=(\d+).*cache_read=(\d+)/);
                 if (match) {
-                  setTokensIn((prev) => prev + parseInt(match[1], 10));
-                  setTokensOut((prev) => prev + parseInt(match[2], 10));
-                  setCacheRead((prev) => prev + parseInt(match[3], 10));
+                  dispatch({
+                    type: 'UPDATE_TOKENS',
+                    input: parseInt(match[1], 10),
+                    output: parseInt(match[2], 10),
+                    cache: parseInt(match[3], 10),
+                  });
                 }
               } else if (!content.startsWith('[')) {
-                // Skip other bracketed status messages
-                streamingRef.current += content;
-                setStreamingText(streamingRef.current);
+                currentStreaming += content;
+                dispatch({ type: 'SET_STREAMING', text: currentStreaming });
               }
               break;
             }
             case 'tool_start':
-              setActiveTool(event.data.name as string);
+              dispatch({ type: 'SET_TOOL', name: event.data.name as string });
               break;
             case 'tool_result': {
-              setActiveTool(null);
-              const toolMessage: Message = {
-                id: `tool-${Date.now()}-${Math.random()}`,
-                role: 'tool',
-                content: (event.data.output as string).slice(0, 100),
-                toolName: event.data.name as string,
-              };
-              setMessages((prev) => [...prev, toolMessage]);
+              dispatch({ type: 'SET_TOOL', name: null });
+              dispatch({
+                type: 'ADD_MESSAGE',
+                message: {
+                  id: `tool-${Date.now()}-${Math.random()}`,
+                  role: 'tool',
+                  content: (event.data.output as string).slice(0, 100),
+                  toolName: event.data.name as string,
+                },
+              });
               break;
             }
             case 'done':
               // Move streaming text to messages
-              if (streamingRef.current) {
-                const assistantMessage: Message = {
-                  id: `assistant-${Date.now()}`,
-                  role: 'assistant',
-                  content: streamingRef.current,
-                };
-                setMessages((prev) => [...prev, assistantMessage]);
+              if (currentStreaming) {
+                dispatch({
+                  type: 'ADD_MESSAGE',
+                  message: {
+                    id: `assistant-${Date.now()}`,
+                    role: 'assistant',
+                    content: currentStreaming,
+                  },
+                });
               }
               break;
           }
@@ -116,17 +171,17 @@ export const App: React.FC<AppProps> = ({ config }) => {
 
       setHistory(updatedHistory);
     } catch (error) {
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      dispatch({
+        type: 'ADD_MESSAGE',
+        message: {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      });
     } finally {
-      setStreamingText('');
-      streamingRef.current = '';
-      setActiveTool(null);
-      setIsProcessing(false);
+      dispatch({ type: 'RESET_STREAMING' });
+      dispatch({ type: 'SET_PROCESSING', value: false });
     }
   }, [config, exit, history]);
 
@@ -135,20 +190,20 @@ export const App: React.FC<AppProps> = ({ config }) => {
       <Header
         model={config.model}
         workDir={config.workDir}
-        tokensIn={tokensIn}
-        tokensOut={tokensOut}
-        cacheRead={cacheRead}
+        tokensIn={state.tokensIn}
+        tokensOut={state.tokensOut}
+        cacheRead={state.cacheRead}
       />
       <Box flexDirection="column" paddingY={1}>
-        <MessageList messages={messages} />
-        <StreamingText text={streamingText} />
-        <ToolStatus toolName={activeTool} />
+        <MessageList messages={state.messages} />
+        {state.activeTool && <ToolStatus toolName={state.activeTool} />}
+        {state.streamingText && <StreamingText text={state.streamingText} />}
       </Box>
       <InputPrompt
         value={inputValue}
         onChange={setInputValue}
         onSubmit={handleSubmit}
-        disabled={isProcessing}
+        disabled={state.isProcessing}
       />
     </Box>
   );

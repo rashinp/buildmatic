@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindful Journal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Background texture layers -->
+        <div class="paper-texture"></div>
+        <div class="grain-overlay"></div>
+        
+        <!-- Header -->
+        <header class="journal-header">
+            <h1 class="journal-title">Mindful Journal</h1>
+            <p class="journal-subtitle">Your daily companion for reflection & growth</p>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <!-- Main journal interface -->
+        <main class="journal-main">
+            <!-- New entry form -->
+            <section class="new-entry-section">
+                <div class="entry-card new-entry">
+                    <div class="entry-header">
+                        <h2 class="section-title">Today's Entry</h2>
+                        <div class="mood-selector">
+                            <label class="mood-label">How are you feeling?</label>
+                            <div class="mood-options">
+                                <button class="mood-btn" data-mood="amazing">🌟</button>
+                                <button class="mood-btn" data-mood="good">😊</button>
+                                <button class="mood-btn" data-mood="okay">😐</button>
+                                <button class="mood-btn" data-mood="difficult">😔</button>
+                                <button class="mood-btn" data-mood="struggling">😰</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-content">
+                        <div class="input-group">
+                            <label for="activities">What did you do today?</label>
+                            <textarea 
+                                id="activities" 
+                                placeholder="Describe your day, activities, experiences..."
+                                rows="4"
+                            ></textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="thoughts">What's on your mind?</label>
+                            <textarea 
+                                id="thoughts" 
+                                placeholder="Share your thoughts, feelings, reflections..."
+                                rows="4"
+                            ></textarea>
+                        </div>
+                        
+                        <div class="input-group gratitude-section">
+                            <label for="gratitude">Three things you're grateful for</label>
+                            <div class="gratitude-inputs">
+                                <input type="text" id="gratitude1" placeholder="1. Something that made you smile...">
+                                <input type="text" id="gratitude2" placeholder="2. A person you appreciate...">
+                                <input type="text" id="gratitude3" placeholder="3. A moment of joy or peace...">
+                            </div>
+                        </div>
+                        
+                        <button class="save-btn" id="saveEntry">
+                            <span class="btn-text">Save Entry</span>
+                            <span class="btn-icon">✍️</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Entries list -->
+            <section class="entries-section">
+                <h2 class="section-title">Your Journey</h2>
+                <div class="entries-container" id="entriesContainer">
+                    <!-- Entries will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
