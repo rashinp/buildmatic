@@ -8,6 +8,13 @@ index.html
 style.css
 styles.css
 script.js
+
+# Generated project folders (common patterns)
 *-landing-page/
 *-app/
 *-dashboard/
+*-website/
+*-page/
+*-journal/
+*-tracker/
+*-portfolio/
