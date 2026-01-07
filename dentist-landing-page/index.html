@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Elena Bloom - Premier Dental Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-floating">
+        <div class="nav-container">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" class="logo-icon">
+                    <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="16" cy="24" r="2" fill="currentColor"/>
+                    <circle cx="24" cy="24" r="2" fill="currentColor"/>
+                </svg>
+                <span class="logo-text">Dr. Bloom</span>
+            </div>
+            <div class="nav-links">
+                <a href="#services">Services</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                <button class="cta-button">Book Appointment</button>
+            </div>
+            <button class="mobile-menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">Your smile,</span>
+                    <span class="title-line">our artistry</span>
+                </h1>
+                <p class="hero-description">
+                    Experience dental care that combines cutting-edge technology 
+                    with a gentle, personalized approach. Dr. Elena Bloom and her team 
+                    create healthy, beautiful smiles in a serene, spa-like environment.
+                </p>
+                <div class="hero-actions">
+                    <button class="primary-button">Schedule Consultation</button>
+                    <button class="secondary-button">
+                        <span class="button-icon">▶</span>
+                        Watch Our Story
+                    </button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">3,500+</div>
+                        <div class="stat-label">Happy Patients</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="image-container">
+                    <div class="floating-elements">
+                        <div class="floating-card card-1">
+                            <div class="card-icon">✨</div>
+                            <div class="card-text">Gentle Care</div>
+                        </div>
+                        <div class="floating-card card-2">
+                            <div class="card-icon">🦷</div>
+                            <div class="card-text">Advanced Tech</div>
+                        </div>
+                        <div class="floating-card card-3">
+                            <div class="card-icon">💎</div>
+                            <div class="card-text">Premium Results</div>
+                        </div>
+                    </div>
+                    <div class="hero-illustration">
+                        <svg width="400" height="400" viewBox="0 0 400 400" class="illustration-svg">
+                            <!-- Abstract tooth/smile illustration -->
+                            <defs>
+                                <radialGradient id="toothGradient" cx="50%" cy="30%" r="50%">
+                                    <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#e8f3f1;stop-opacity:1" />
+                                </radialGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                    <feMerge> 
+                                        <feMergeNode in="coloredBlur"/>
+                                        <feMergeNode in="SourceGraphic"/> 
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <circle cx="200" cy="180" r="80" fill="url(#toothGradient)" filter="url(#glow)"/>
+                            <path d="M140 180 Q200 140 260 180" stroke="#2a9d8f" stroke-width="3" fill="none"/>
+                            <circle cx="170" cy="200" r="8" fill="#2a9d8f" opacity="0.7"/>
+                            <circle cx="230" cy="200" r="8" fill="#2a9d8f" opacity="0.7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Comprehensive Dental Care</h2>
+                <p class="section-subtitle">From preventive care to cosmetic transformations</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="25" fill="#e8f3f1" stroke="#2a9d8f" stroke-width="2"/>
+                            <path d="M20 30 L28 38 L42 24" stroke="#2a9d8f" stroke-width="3" fill="none"/>
+                        </svg>
+                    </div>
+                    <h3 class="service-title">Preventive Care</h3>
+                    <p class="service-description">
+                        Regular cleanings, exams, and preventive treatments to maintain optimal oral health and catch issues early.
+                    </p>
+                    <ul class="service-features">
+                        <li>Comprehensive oral exams</li>
+                        <li>Professional cleanings</li>
+                        <li>Digital X-rays</li>
+                        <li>Fluoride treatments</li>
+                    </ul>
+                </div>
+
+                <div class="service-card featured">
+                    <div class="featured-badge">Most Popular</div>
+                    <div class="service-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <rect x="15" y="20" width="30" height="20" rx="10" fill="#264653" opacity="0.8"/>
+                            <circle cx="30" cy="30" r="15" fill="#f4a261" opacity="0.9"/>
+                            <path d="M25 28 Q30 23 35 28" stroke="#fff" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <h3 class="service-title">Cosmetic Dentistry</h3>
+                    <p class="service-description">
+                        Transform your smile with our advanced cosmetic treatments designed to enhance both beauty and function.
+                    </p>
+                    <ul class="service-features">
+                        <li>Porcelain veneers</li>
+                        <li>Teeth whitening</li>
+                        <li>Dental bonding</li>
+                        <li>Smile makeovers</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="20" fill="#e76f51" opacity="0.2"/>
+                            <rect x="25" y="20" width="10" height="20" fill="#e76f51"/>
+                            <circle cx="30" cy="45" r="8" fill="#2a9d8f"/>
+                        </svg>
+                    </div>
+                    <h3 class="service-title">Restorative Care</h3>
+                    <p class="service-description">
+                        Repair and restore damaged teeth with our comprehensive restorative solutions for lasting oral health.
+                    </p>
+                    <ul class="service-features">
+                        <li>Dental implants</li>
+                        <li>Crowns & bridges</li>
+                        <li>Root canal therapy</li>
+                        <li>Dentures</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="section-container">
+            <div class="about-content">
+                <div class="about-image">
+                    <div class="doctor-placeholder">
+                        <div class="doctor-avatar">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="#2a9d8f"/>
+                                <circle cx="60" cy="45" r="15" fill="#f8f9fa"/>
+                                <path d="M35 85 Q60 70 85 85" fill="#f8f9fa"/>
+                            </svg>
+                        </div>
+                        <div class="credentials">
+                            <div class="credential-badge">DDS</div>
+                            <div class="credential-badge">Board Certified</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-text">
+                    <h2 class="about-title">Meet Dr. Elena Bloom</h2>
+                    <p class="about-description">
+                        With over 15 years of experience in advanced dental care, Dr. Bloom combines 
+                        artistic vision with clinical excellence to create beautiful, healthy smiles. 
+                        Her gentle approach and commitment to patient comfort have made her one of 
+                        the most trusted dentists in the community.
+                    </p>
+                    <div class="qualifications">
+                        <div class="qualification">
+                            <h4>Education</h4>
+                            <p>DDS from Harvard School of Dental Medicine<br>
+                            Residency at Massachusetts General Hospital</p>
+                        </div>
+                        <div class="qualification">
+                            <h4>Specializations</h4>
+                            <p>Cosmetic Dentistry, Implantology<br>
+                            Sedation Dentistry, TMJ Treatment</p>
+                        </div>
+                        <div class="qualification">
+                            <h4>Memberships</h4>
+                            <p>American Dental Association<br>
+                            Academy of Cosmetic Dentistry</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="section-container">
+            <h2 class="section-title">What Our Patients Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">
+                        "Dr. Bloom transformed my smile completely. The process was comfortable, 
+                        and the results exceeded my expectations. I finally love my smile!"
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Sarah M.</strong>
+                        <span>Cosmetic Patient</span>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">
+                        "The most gentle dental experience I've ever had. The office feels more 
+                        like a spa than a dental clinic. Highly recommend!"
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Michael R.</strong>
+                        <span>General Patient</span>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">
+                        "Professional, caring, and incredibly skilled. Dr. Bloom's attention to 
+                        detail is remarkable. My whole family sees her now."
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Jennifer L.</strong>
+                        <span>Family Patient</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="section-container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2 class="contact-title">Ready for Your Best Smile?</h2>
+                    <p class="contact-description">
+                        Schedule your consultation today and take the first step toward 
+                        optimal oral health and a beautiful smile.
+                    </p>
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div>
+                                <strong>Address</strong>
+                                <p>123 Wellness Boulevard<br>Beverly Hills, CA 90210</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div>
+                                <strong>Phone</strong>
+                                <p>(555) 123-SMILE<br>(555) 123-7645</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🕒</div>
+                            <div>
+                                <strong>Hours</strong>
+                                <p>Mon-Fri: 8AM-6PM<br>Sat: 9AM-3PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form class="appointment-form">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="service">Preferred Service</label>
+                            <select id="service" name="service">
+                                <option value="">Select a service</option>
+                                <option value="consultation">Initial Consultation</option>
+                                <option value="cleaning">Cleaning & Exam</option>
+                                <option value="cosmetic">Cosmetic Consultation</option>
+                                <option value="emergency">Emergency Appointment</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message (Optional)</label>
+                            <textarea id="message" name="message" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="form-submit">Schedule Appointment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <svg width="40" height="40" viewBox="0 0 40 40" class="logo-icon">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="16" cy="24" r="2" fill="currentColor"/>
+                            <circle cx="24" cy="24" r="2" fill="currentColor"/>
+                        </svg>
+                        <span class="logo-text">Dr. Bloom</span>
+                    </div>
+                    <p>Creating beautiful, healthy smiles with gentle, personalized care.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Services</h4>
+                        <a href="#services">Preventive Care</a>
+                        <a href="#services">Cosmetic Dentistry</a>
+                        <a href="#services">Restorative Care</a>
+                        <a href="#services">Emergency Care</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Practice</h4>
+                        <a href="#about">About Dr. Bloom</a>
+                        <a href="#contact">Contact</a>
+                        <a href="#">Patient Portal</a>
+                        <a href="#">Insurance</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Dr. Elena Bloom DDS. All rights reserved.</p>
+                <div class="footer-legal">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

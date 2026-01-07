@@ -37,8 +37,8 @@ function smartTruncate(output: string, maxLength: number): string {
 }
 
 /**
- * Sanitize assistant message for history - truncate large tool inputs
- * This prevents huge content (like file writes) from bloating context
+ * Sanitize assistant message for history - truncate very large tool inputs
+ * Balance: keep enough for context (class names, structure) but prevent bloat
  */
 function sanitizeAssistantMessage(content: Anthropic.Messages.ContentBlock[]): Anthropic.Messages.ContentBlock[] {
   return content.map(block => {
@@ -47,9 +47,10 @@ function sanitizeAssistantMessage(content: Anthropic.Messages.ContentBlock[]): A
       const sanitizedInput: Record<string, unknown> = {};
 
       for (const [key, value] of Object.entries(input)) {
-        if (typeof value === 'string' && value.length > 500) {
-          // Truncate large string inputs (like file content)
-          sanitizedInput[key] = value.slice(0, 200) + `... [${value.length - 200} chars truncated]`;
+        if (typeof value === 'string' && value.length > 4000) {
+          // Only truncate VERY large inputs (>4KB)
+          // Keep 3KB to preserve class names, structure, key code
+          sanitizedInput[key] = value.slice(0, 3000) + `\n... [${value.length - 3000} chars truncated]`;
         } else {
           sanitizedInput[key] = value;
         }
@@ -157,9 +158,9 @@ export async function runAgent(
 ): Promise<MessageParam[]> {
   const { config, onEvent } = options;
 
-  // Defaults - lower values to reduce token usage
-  const maxToolOutput = config.maxToolOutputLength ?? 3000;  // Reduced from 5000
-  const maxContextMessages = config.maxContextMessages ?? 10; // Reduced from 20
+  // Defaults - balanced for token savings + quality
+  const maxToolOutput = config.maxToolOutputLength ?? 4000;
+  const maxContextMessages = config.maxContextMessages ?? 16; // Keep more context for multi-file tasks
   const modelFast = config.modelFast ?? "claude-3-5-haiku-20241022";
 
   const client = config.baseUrl

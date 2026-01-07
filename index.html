@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Journal - Capture Your Moments</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="journal-container">
+        <header class="journal-header">
+            <h1 class="journal-title">My Daily Journal</h1>
+            <p class="journal-subtitle">Capture the moments that matter</p>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <main class="journal-main">
+            <div class="journal-pages">
+                <!-- New Entry Form -->
+                <section class="journal-page new-entry" id="newEntrySection">
+                    <div class="page-header">
+                        <h2 class="page-title">Today's Entry</h2>
+                        <div class="mood-selector">
+                            <label class="mood-label">How are you feeling?</label>
+                            <div class="mood-options">
+                                <button class="mood-btn" data-mood="amazing" title="Amazing">✨</button>
+                                <button class="mood-btn" data-mood="happy" title="Happy">😊</button>
+                                <button class="mood-btn" data-mood="good" title="Good">🙂</button>
+                                <button class="mood-btn" data-mood="okay" title="Okay">😐</button>
+                                <button class="mood-btn" data-mood="sad" title="Sad">😔</button>
+                                <button class="mood-btn" data-mood="stressed" title="Stressed">😰</button>
+                                <button class="mood-btn" data-mood="angry" title="Angry">😠</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="entry-form">
+                        <div class="form-group">
+                            <label for="activities">What did you do today?</label>
+                            <textarea id="activities" placeholder="Describe your activities, experiences, and thoughts...&#10;&#10;• Work on project&#10;• Had lunch with friends&#10;• Went for a walk"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="highlights">Today's highlights</label>
+                            <textarea id="highlights" placeholder="What made you smile today?&#10;&#10;• Beautiful sunset&#10;• Good conversation&#10;• Small victories"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gratitude">Grateful for...</label>
+                            <textarea id="gratitude" placeholder="Three things you're grateful for today...&#10;&#10;• Health and energy&#10;• Supportive friends&#10;• A warm home"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="save-btn" id="saveEntry">Save Entry</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Journal Entries List -->
+                <section class="journal-page entries-list" id="entriesSection">
+                    <div class="page-header">
+                        <h2 class="page-title">Previous Entries</h2>
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" data-view="recent">Recent</button>
+                            <button class="toggle-btn" data-view="all">All Entries</button>
+                        </div>
+                    </div>
+
+                    <div class="entries-container" id="entriesContainer">
+                        <div class="empty-state">
+                            <div class="empty-icon">📖</div>
+                            <p>Start your journaling journey today!</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <nav class="journal-nav">
+            <button class="nav-btn active" data-page="new-entry">
+                <span class="nav-icon">✍️</span>
+                <span class="nav-label">Write</span>
+            </button>
+            <button class="nav-btn" data-page="entries">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Entries</span>
+            </button>
+        </nav>
+    </div>
+
+    <div class="floating-elements">
+        <div class="floating-dot dot-1"></div>
+        <div class="floating-dot dot-2"></div>
+        <div class="floating-dot dot-3"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
