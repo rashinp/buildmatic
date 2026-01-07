@@ -3,7 +3,7 @@
 
 import { Command } from "commander";
 import { loadConfig } from "./agent/config.js";
-import { startRepl } from "./cli/repl.js";
+import { startUI } from "./ui/index.js";
 import { runCommand } from "./cli/commands.js";
 import { startServer } from "./server/index.js";
 
@@ -24,7 +24,7 @@ program
     if (command) {
       await runCommand(command, config);
     } else {
-      await startRepl(config);
+      await startUI(config);
     }
   });
 
